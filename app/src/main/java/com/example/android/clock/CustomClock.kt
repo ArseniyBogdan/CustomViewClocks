@@ -27,16 +27,11 @@ class CustomClock @JvmOverloads constructor(
         get() = radius * 0.88f
 
     // объекты
-    private var arrowType = ClockArrows.SECONDS
-    private lateinit var clockArrowCoordinates: ClockArrowCoordinates
-    private lateinit var blurMaskS: BlurMaskFilter
-    private lateinit var blurMaskM: BlurMaskFilter
-    private lateinit var blurMaskH: BlurMaskFilter
-
     private val mRect = Rect()
     private val pointPosition = PointF(0.0f, 0.0f)
     lateinit var shadowPainter: Paintable
     lateinit var arrowsPainter: Paintable
+    lateinit var radialShader: Paintable
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -59,14 +54,13 @@ class CustomClock @JvmOverloads constructor(
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
-        radius = (min(width, height) / 2.0 * 0.8).toFloat()
-        blurMaskS = BlurMaskFilter(radius*0.01f, BlurMaskFilter.Blur.NORMAL)
-        blurMaskM = BlurMaskFilter(radius*0.03f, BlurMaskFilter.Blur.NORMAL)
-        blurMaskH = BlurMaskFilter(radius*0.05f, BlurMaskFilter.Blur.NORMAL)
+        radius = (min(width, height) / 2.0 * 1).toFloat()
         shadowPainter = ShadowPainter(widthOfView = width.toFloat(),
-            heightOfView = height.toFloat())
+            heightOfView = width.toFloat())
         arrowsPainter = ClockArrowPainter(widthOfView = width.toFloat(),
-            heightOfView = height.toFloat())
+            heightOfView = width.toFloat())
+        radialShader = RadialShader(widthOfView = width.toFloat(),
+            heightOfView = width.toFloat())
         ClockArrows.radius = radius
     }
 
@@ -108,8 +102,13 @@ class CustomClock @JvmOverloads constructor(
         /** отрисовка стрелок */
         arrowsPainter.paint(canvas, paint)
 
+        /** Отрисовка тени */
+        radialShader.paint(canvas, paint)
+
         /** отложение перерисовки представления */
         postInvalidateDelayed(50)
         invalidate()
     }
+
+
 }

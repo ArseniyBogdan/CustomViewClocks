@@ -12,7 +12,7 @@ class ShadowPainter(private val widthOfView: Float, private val heightOfView: Fl
 
     private val line = Line()
     private val lineBuilder = LineBuilder()
-    private val clockArrowCoordinates = ClockArrowCoordinates(widthOfView, heightOfView)
+    private val clockArrowCoordinates = ClockArrowCoordinates(width = widthOfView, height = heightOfView)
     private val blurMaskS = BlurMaskFilter(radius*0.01f, BlurMaskFilter.Blur.NORMAL)
     private val blurMaskM = BlurMaskFilter(radius*0.03f, BlurMaskFilter.Blur.NORMAL)
     private val blurMaskH = BlurMaskFilter(radius*0.05f, BlurMaskFilter.Blur.NORMAL)
