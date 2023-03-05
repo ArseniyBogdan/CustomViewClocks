@@ -13,44 +13,46 @@ class ShadowPainter(private val widthOfView: Float, private val heightOfView: Fl
     private val line = Line()
     private val lineBuilder = LineBuilder()
     private val clockArrowCoordinates = ClockArrowCoordinates(width = widthOfView, height = heightOfView)
-    private val blurMaskS = BlurMaskFilter(radius*0.01f, BlurMaskFilter.Blur.NORMAL)
-    private val blurMaskM = BlurMaskFilter(radius*0.03f, BlurMaskFilter.Blur.NORMAL)
-    private val blurMaskH = BlurMaskFilter(radius*0.05f, BlurMaskFilter.Blur.NORMAL)
+    private val blurMaskS = BlurMaskFilter(
+        ClockArrows.SECONDS.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+    private val blurMaskM = BlurMaskFilter(
+        ClockArrows.MINUTES.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+    private val blurMaskH = BlurMaskFilter(
+        ClockArrows.HOURS.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        color = Color.GRAY
+    }
 
-    override fun paint(canvas: Canvas, paint: Paint) {
-        /** отрисовка тени стрелок */
+    override fun paint(canvas: Canvas) {
+        /** отрисовка тени для секундной стрелки */
+        var arrowType = ClockArrows.SECONDS
         val offsetX = radius*0.05f
         val offsetY = radius*0.02f
-        paint.color = Color.GRAY
         paint.maskFilter = blurMaskS
         clockArrowCoordinates.computeXYForArrow(arrowType)
-        arrowType = arrowType.next()
         lineBuilder.apply {
             configureBuilder(clockArrowCoordinates)
             offsetXY(offsetX, offsetY)
             startXY(widthOfView / 2f, heightOfView / 2f)
-            canvas.drawClockArrow(radius*0.01f, build(line), paint)
+            canvas.drawClockArrow(ClockArrows.SECONDS.strokeWidth, build(line), paint)
             configureBuilder(clockArrowCoordinates)
             offsetXY(offsetX, offsetY)
             stopXY(widthOfView / 2f, heightOfView / 2f)
-            canvas.drawClockArrow(radius*0.03f, build(line), paint)
+            canvas.drawClockArrow(ClockArrows.MINUTES.strokeWidth, build(line), paint)
         }
 
-
-        paint.maskFilter = blurMaskM
-        clockArrowCoordinates.computeXYForArrow(arrowType)
-        arrowType = arrowType.next()
-        lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
-        canvas.drawClockArrow(radius*0.03f, lineBuilder.build(line), paint)
-
-        paint.maskFilter = blurMaskH
-        clockArrowCoordinates.computeXYForArrow(arrowType)
-        arrowType = arrowType.next()
-        lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
-        canvas.drawClockArrow(radius*0.05f, lineBuilder.build(line), paint)
-    }
-
-    companion object{
-        private var arrowType = ClockArrows.SECONDS
+        /** отрисовка тени для минутной и часовой стрелки */
+        while(arrowType != ClockArrows.HOURS){
+            arrowType = arrowType.next()
+            paint.maskFilter = when(arrowType){
+                ClockArrows.MINUTES -> blurMaskM
+                ClockArrows.HOURS -> blurMaskH
+                else -> {null}
+            }
+            clockArrowCoordinates.computeXYForArrow(arrowType)
+            lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
+            canvas.drawClockArrow(arrowType.strokeWidth, lineBuilder.build(line), paint)
+        }
     }
 }

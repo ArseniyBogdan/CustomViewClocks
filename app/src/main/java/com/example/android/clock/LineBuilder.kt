@@ -1,5 +1,7 @@
 package com.example.android.clock
 
+
+/** класс отвечающий за конфигурацию линий перед отрисовкой */
 class LineBuilder{
     private var startX: Float = 0f
     private var startY: Float = 0f

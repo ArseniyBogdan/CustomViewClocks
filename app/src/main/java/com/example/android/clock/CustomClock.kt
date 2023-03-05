@@ -5,9 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
-import com.example.android.clock.extensions.drawClockArrow
 import com.example.clocks.R
-import java.time.LocalTime
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -32,9 +30,9 @@ class CustomClock @JvmOverloads constructor(
     // объекты
     private val mRect = Rect()
     private val pointPosition = PointF(0.0f, 0.0f)
-    lateinit var shadowPainter: Paintable
-    lateinit var arrowsPainter: Paintable
-    lateinit var radialShader: Paintable
+    private lateinit var shadowPainter: Paintable
+    private lateinit var arrowsPainter: Paintable
+    private lateinit var radialShader: Paintable
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -60,13 +58,13 @@ class CustomClock @JvmOverloads constructor(
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
         radius = (min(width, height) / 2.0 * 0.9).toFloat()
+        ClockArrows.radius = radius
         shadowPainter = ShadowPainter(widthOfView = width.toFloat(),
             heightOfView = width.toFloat())
         arrowsPainter = ClockArrowPainter(widthOfView = width.toFloat(),
             heightOfView = width.toFloat())
         radialShader = RadialShader(widthOfView = width.toFloat(),
             heightOfView = width.toFloat())
-        ClockArrows.radius = radius
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -100,18 +98,17 @@ class CustomClock @JvmOverloads constructor(
 
 
         /** отрисовка тени стрелок */
-        shadowPainter.paint(canvas, paint)
+        shadowPainter.paint(canvas)
 
         /** отрисовка стрелок */
-        arrowsPainter.paint(canvas, paint)
+        arrowsPainter.paint(canvas)
 
         /** Отрисовка тени */
-        radialShader.paint(canvas, paint)
+        radialShader.paint(canvas)
 
         /** отложение перерисовки представления */
         postInvalidateDelayed(50)
         invalidate()
     }
-
 
 }

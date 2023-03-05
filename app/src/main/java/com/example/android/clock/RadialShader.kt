@@ -13,132 +13,96 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
     private val radiusOfInnerCircle
         get() = radius * 0.97f
 
-    private val shadowShader: Bitmap
-    private val shadowLayer: Bitmap
-    private val xfermodeSrcIn = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-    private val xfermodeSrcOut = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
-    private val modeClear = PorterDuff.Mode.CLEAR
+    private val shadowShader: Bitmap = prepareShadowShader()
+    private val shadowLayer: Bitmap = prepareBlurredShadow()
+    private val shineLayer: Bitmap = createShine()
 
-    init{
-        shadowShader = prepareShadowShader()
-        shadowLayer = prepareBlurrableShadow()
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        color = Color.BLACK
     }
 
-    override fun paint(canvas: Canvas, paint: Paint) {
+    override fun paint(canvas: Canvas) {
         /** painting shadows*/
         canvas.drawBitmap(shadowLayer, 0.0f, 0.0f, paint)
         canvas.drawBitmap(shadowShader, 0.0f, 0.0f, paint)
 
-
         /** отрисовка блеска */
-        val shapeShine = createShapeShine()
-        canvas.drawBitmap(shapeShine, 0.0f, 0.0f, paint)
+        canvas.drawBitmap(shineLayer, 0.0f, 0.0f, paint)
     }
 
-    fun createShapeShine(): Bitmap{
-        val bitmapSRC = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
-        val bitmapShine = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
+    private fun createShine(): Bitmap {
+        val bitmapShine =
+            Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
         val canvasMask = Canvas(bitmapShine)
-        val canvasCircles = Canvas(bitmapSRC)
         val shaderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             strokeWidth = 3f
             style = Paint.Style.STROKE
-            xfermode = null
         }
 
-        val oval = RectF()
-        val center_x = widthOfView/2;
-        val center_y = heightOfView/2;
-        oval.set(center_x - radius, center_y - radius,
-            center_x + radius, center_y + radius);
+        canvasMask.drawCircle(widthOfView / 2, heightOfView / 2, radius, shaderPaint)
 
-        canvasMask.drawArc(oval, 120f,160f, false, shaderPaint)
-        val shadowLayer = blurrableShadowCreate(bitmapShine, widthOfView.toInt(), heightOfView.toInt(),
-            Color.WHITE, 2, 2f, 1f)
-        val canvasShadowLayer = Canvas(shadowLayer)
-        shaderPaint.apply {
-            reset()
-            color = Color.WHITE
-            style = Paint.Style.FILL
-        }
-
-        /** clearing bitmap*/
-        canvasCircles.drawColor(Color.TRANSPARENT, modeClear)
-
-        /** cutting Arc*/
-        canvasCircles.drawArc(oval, 100f, 190f, true, shaderPaint)
-        shaderPaint.xfermode = xfermodeSrcIn
-        canvasShadowLayer.drawBitmap(bitmapSRC, 0.0f, 0.0f, shaderPaint)
-
-        return shadowLayer
+        return blurredShadowCreate(
+            bitmapShine, widthOfView.toInt(), heightOfView.toInt(),
+            Color.WHITE, 1, 2f, 1f
+        )
     }
 
-    fun prepareBlurrableShadow(): Bitmap{
+    private fun prepareBlurredShadow(): Bitmap{
         /** adding addition shadow */
-        val bitmapSRC = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
         val bitmapShadow = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
         val canvasMask = Canvas(bitmapShadow)
-        val canvasCircles = Canvas(bitmapSRC)
         val shaderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             strokeWidth = 30f
             style = Paint.Style.STROKE
-            xfermode = null
         }
 
         canvasMask.drawCircle(widthOfView/2, heightOfView/2, radiusOfInnerCircle, shaderPaint)
-        val shadowLayer = blurrableShadowCreate(bitmapShadow, widthOfView.toInt(), heightOfView.toInt(),
+        val shadowLayer = blurredShadowCreate(bitmapShadow, widthOfView.toInt(), heightOfView.toInt(),
             Color.BLACK, 30, 15f, 3f)
-        val canvasShadowLayer = Canvas(shadowLayer)
-        shaderPaint.apply {
+        cutArc(shadowLayer, radiusOfInnerCircle, 90f, 200f, 0f,0f,
+            PorterDuffXfermode(PorterDuff.Mode.SRC_IN))
+
+        return shadowLayer
+    }
+
+    private fun prepareShadowShader(): Bitmap{
+        val bitmapDST = shadowShaderCreate()
+        /** cutting circles*/
+        cutArc(bitmapDST, radiusOfInnerCircle,0f, 360f, 0f,0f,
+            PorterDuffXfermode(PorterDuff.Mode.SRC_IN))
+        cutArc(bitmapDST, radiusOfInnerCircle,0f, 360f, radius*0.2f,radius*0.07f,
+            PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
+
+        return bitmapDST
+    }
+
+    private fun cutArc(Layer: Bitmap, radiusOfInnerCircle: Float ,
+                       startAngle: Float, sweepAngle: Float,
+                       offsetX: Float, offsetY: Float, xFerMode: Xfermode){
+        val bitmapSRC = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
+        val canvasCircles = Canvas(bitmapSRC)
+        val canvasShadowLayer = Canvas(Layer)
+        val shaderPaint = Paint().apply {
             reset()
             color = Color.BLACK
             style = Paint.Style.FILL
         }
 
-        /** clearing bitmap*/
-        canvasCircles.drawColor(Color.TRANSPARENT, modeClear)
-
         /** cutting Arc*/
         val oval = RectF()
-        val center_x = widthOfView/2;
-        val center_y = heightOfView/2;
-        oval.set(center_x - radiusOfInnerCircle, center_y - radiusOfInnerCircle,
-            center_x + radiusOfInnerCircle, center_y + radiusOfInnerCircle);
-        canvasCircles.drawArc(oval, 90f, 200f, true, shaderPaint)
-        shaderPaint.xfermode = xfermodeSrcIn
+        val centerX = widthOfView/2
+        val centerY = heightOfView/2
+        oval.set(centerX - radiusOfInnerCircle + offsetX,
+            centerY - radiusOfInnerCircle + offsetY,
+            centerX + radiusOfInnerCircle + offsetX,
+            centerY + radiusOfInnerCircle + offsetY)
+
+        canvasCircles.drawArc(oval, startAngle, sweepAngle, false, shaderPaint)
+        shaderPaint.xfermode = xFerMode
         canvasShadowLayer.drawBitmap(bitmapSRC, 0.0f, 0.0f, shaderPaint)
-        return shadowLayer
-    }
-
-    private fun prepareShadowShader(): Bitmap{
-        /** cutting circle*/
-        val bitmapSRC = Bitmap.createBitmap(widthOfView.toInt(), heightOfView.toInt(), Bitmap.Config.ARGB_8888)
-        val bitmapDST = shadowShaderCreate()
-        val shaderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            xfermode = null
-            color = Color.BLACK
-            style = Paint.Style.FILL
-        }
-        val canvasShadow = Canvas(bitmapDST)
-        val canvasCircles = Canvas(bitmapSRC)
-        canvasCircles.drawCircle(widthOfView/2, heightOfView/2, radiusOfInnerCircle, shaderPaint)
-        shaderPaint.xfermode = xfermodeSrcIn
-        canvasShadow.drawBitmap(bitmapSRC, 0.0f, 0.0f, shaderPaint)
-
-        /** clearing bitmap*/
-        shaderPaint.xfermode = null
-        canvasCircles.apply{
-            drawColor(Color.TRANSPARENT, modeClear)
-            drawCircle(widthOfView/2+radius*0.2f, heightOfView/2+radius*0.07f,
-                radiusOfInnerCircle, shaderPaint)
-        }
-
-        /** cutting month*/
-        shaderPaint.xfermode = xfermodeSrcOut
-        canvasShadow.drawBitmap(bitmapSRC, 0.0f, 0.0f, shaderPaint)
-        return bitmapDST
     }
 
     private fun shadowShaderCreate(): Bitmap{
@@ -152,7 +116,7 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
         return drawable.toBitmap(config = Bitmap.Config.ARGB_8888)
     }
 
-    private fun blurrableShadowCreate(bm: Bitmap, dstWidth: Int, dstHeight: Int,
+    private fun blurredShadowCreate(bm: Bitmap, dstWidth: Int, dstHeight: Int,
         color: Int, size: Int, dx: Float, dy: Float): Bitmap {
         val mask = Bitmap.createBitmap(dstWidth, dstHeight, Bitmap.Config.ALPHA_8)
 
