@@ -2,8 +2,8 @@ package com.example.android.clock
 
 import android.content.Context
 import android.graphics.*
+import android.icu.util.TimeZone
 import android.util.AttributeSet
-import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import androidx.core.content.withStyledAttributes
@@ -21,7 +21,8 @@ class CustomClock @JvmOverloads constructor(
     // numeric numbers to denote the hours
     private val mClockHours = (1 .. 12).map{it}
 
-    private var radius = 0.0f
+    private var lengthSide = 0f
+    private var radius = 0f
     private val radiusOfInnerCircle
         get() = radius * 0.91f
     private val radiusOfDashedCircle
@@ -42,7 +43,8 @@ class CustomClock @JvmOverloads constructor(
         typeface = Typeface.create( "", Typeface.NORMAL)
     }
 
-    private var timeZone: TimeZones = TimeZones.UTC_P0
+    private var timeZone: TimeZones = TimeZones.getTimeZoneByOffset(
+        TimeZone.getDefault().rawOffset / (60 * 60 * 1000))
     private var textColor: Int = Color.BLACK
     private var frameColor: Int = Color.BLACK
     private var bgColor: Int = Color.argb(255, 255, 251, 251)
@@ -68,23 +70,24 @@ class CustomClock @JvmOverloads constructor(
         // Angles are in radians.
         val startAngle = Math.PI * (3/ 2.0)
         val angle = startAngle + hour * (Math.PI / 6)
-        x = (radius * cos(angle)).toFloat() + width / 2
-        y = (radius * sin(angle)).toFloat() + mRect.height()/2 + height / 2
+        x = (radius * cos(angle)).toFloat() + lengthSide / 2
+        y = (radius * sin(angle)).toFloat() + mRect.height()/2 + lengthSide / 2
     }
 
     private fun PointF.computeXYForDots(index: Int, radius: Float) {
         val angle = index * (Math.PI / 30)
-        x = (radius * cos(angle)).toFloat() + width / 2
-        y = (radius * sin(angle)).toFloat() + height / 2
+        x = (radius * cos(angle)).toFloat() + lengthSide / 2
+        y = (radius * sin(angle)).toFloat() + lengthSide / 2
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
+        lengthSide = min(width,
+            height).toFloat()
         radius = (min(width, height) / 2.0 * 0.9).toFloat()
-        ClockArrows.radius = radius
         shadowPainter = ShadowPainter(widthOfView = width.toFloat(),
             heightOfView = width.toFloat(), timeZone)
         arrowsPainter = ClockArrowPainter(widthOfView = width.toFloat(),
-            heightOfView = width.toFloat(), timeZone)
+            heightOfView = width.toFloat(), timeZone, radius)
         radialShader = RadialShader(widthOfView = width.toFloat(),
             heightOfView = width.toFloat())
     }
@@ -94,11 +97,11 @@ class CustomClock @JvmOverloads constructor(
 
         // drawing the edging
         paint.color = frameColor
-        canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), radius, paint)
+        canvas.drawCircle((lengthSide/2), (lengthSide/2), radius, paint)
 
         // drawing a dial
         paint.color = bgColor
-        canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), radiusOfInnerCircle, paint)
+        canvas.drawCircle((lengthSide/2), (lengthSide/2), radiusOfInnerCircle, paint)
 
         paint.color = Color.BLACK
         for(minutes in 1..60){

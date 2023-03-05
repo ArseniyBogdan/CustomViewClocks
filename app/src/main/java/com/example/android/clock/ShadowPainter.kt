@@ -16,11 +16,11 @@ class ShadowPainter(private val widthOfView: Float,
     private val lineBuilder = LineBuilder()
     private val clockArrowCoordinates = ClockArrowCoordinates(width = widthOfView, height = heightOfView)
     private val blurMaskS = BlurMaskFilter(
-        ClockArrows.SECONDS.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+        ClockArrows.SECONDS.coefStrokeWidth * radius, BlurMaskFilter.Blur.NORMAL)
     private val blurMaskM = BlurMaskFilter(
-        ClockArrows.MINUTES.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+        ClockArrows.MINUTES.coefStrokeWidth * radius, BlurMaskFilter.Blur.NORMAL)
     private val blurMaskH = BlurMaskFilter(
-        ClockArrows.HOURS.strokeWidth, BlurMaskFilter.Blur.NORMAL)
+        ClockArrows.HOURS.coefStrokeWidth * radius, BlurMaskFilter.Blur.NORMAL)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         color = Color.GRAY
@@ -38,24 +38,24 @@ class ShadowPainter(private val widthOfView: Float,
                 ClockArrows.HOURS -> blurMaskH
                 else -> {null}
             }
-            clockArrowCoordinates.computeXYForArrow(arrowType, timeZone)
+            clockArrowCoordinates.computeXYForArrow(arrowType, radius, timeZone)
             lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
-            canvas.drawClockArrow(arrowType.strokeWidth, lineBuilder.build(line), paint)
+            canvas.drawClockArrow(arrowType.coefStrokeWidth * radius, lineBuilder.build(line), paint)
             arrowType = arrowType.next()
         }
 
         /** отрисовка тени для секундной стрелки */
         paint.maskFilter = blurMaskS
-        clockArrowCoordinates.computeXYForArrow(arrowType, timeZone)
+        clockArrowCoordinates.computeXYForArrow(arrowType, radius, timeZone)
         lineBuilder.apply {
             configureBuilder(clockArrowCoordinates)
             offsetXY(offsetX, offsetY)
             startXY(widthOfView / 2f, heightOfView / 2f)
-            canvas.drawClockArrow(ClockArrows.SECONDS.strokeWidth, build(line), paint)
+            canvas.drawClockArrow(ClockArrows.SECONDS.coefStrokeWidth * radius, build(line), paint)
             configureBuilder(clockArrowCoordinates)
             offsetXY(offsetX, offsetY)
             stopXY(widthOfView / 2f, heightOfView / 2f)
-            canvas.drawClockArrow(ClockArrows.MINUTES.strokeWidth, build(line), paint)
+            canvas.drawClockArrow(ClockArrows.MINUTES.coefStrokeWidth * radius, build(line), paint)
         }
     }
 }

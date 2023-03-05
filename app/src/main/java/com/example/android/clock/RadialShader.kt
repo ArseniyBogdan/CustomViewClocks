@@ -39,7 +39,7 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
         val canvasMask = Canvas(bitmapShine)
         val shaderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
-            strokeWidth = 3f
+            strokeWidth = radius*0.02f
             style = Paint.Style.STROKE
         }
 
@@ -47,7 +47,8 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
 
         return blurredShadowCreate(
             bitmapShine, widthOfView.toInt(), heightOfView.toInt(),
-            Color.WHITE, 1, 2f, 1f
+            Color.WHITE, 1, (radius*0.01f).toInt().toFloat(),
+            (radius*0.005f).toInt().toFloat()
         )
     }
 

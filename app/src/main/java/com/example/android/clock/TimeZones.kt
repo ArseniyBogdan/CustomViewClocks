@@ -9,7 +9,16 @@ enum class TimeZones(val zone: Int) {
     UTC_P8(8), UTC_P9(9), UTC_P10(10), UTC_P11(11),
     UTC_P12(12), UTC_P13(13), UTC_P14(14);
 
+
     companion object{
         val timeZonesList = values()
+        fun getTimeZoneByOffset(offset: Int): TimeZones{
+            try {
+                return timeZonesList[offset + 12]
+            }
+            catch (e: ArrayIndexOutOfBoundsException){
+                return UTC_P0
+            }
+        }
     }
 }
