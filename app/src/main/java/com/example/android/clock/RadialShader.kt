@@ -8,8 +8,9 @@ import androidx.core.graphics.drawable.toBitmap
 import kotlin.math.min
 
 
-class RadialShader(private val widthOfView: Float, private val heightOfView: Float): Paintable {
-    private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
+class RadialShader(private val widthOfView: Float,
+                   private val heightOfView: Float,
+                   private val radius: Float): Paintable {
     private val radiusOfShadowShader
         get() = radius * 0.93f
     private val radiusOfBlurredShadow

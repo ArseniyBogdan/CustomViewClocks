@@ -19,7 +19,7 @@ class CustomClock @JvmOverloads constructor(
 ): View(context, attrs, defStyleAttr) {
 
     // numeric numbers to denote the hours
-    private val mClockHours = (1 .. 12).map{it}
+    private val mClockHours = (1..12).map { it }
 
     private var lengthSide = 0f
     private var radius = 0f
@@ -40,26 +40,32 @@ class CustomClock @JvmOverloads constructor(
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
-        typeface = Typeface.create( "", Typeface.NORMAL)
+        typeface = Typeface.create("", Typeface.NORMAL)
     }
 
-    private var timeZone: TimeZones = TimeZones.getTimeZoneByOffset(
+    var timeZone: TimeZones = TimeZones.getTimeZoneByOffset(
         TimeZone.getDefault().rawOffset / (60 * 60 * 1000))
-    private var textColor: Int = Color.BLACK
-    private var frameColor: Int = Color.BLACK
+    var textColor: Int = Color.BLACK
+    var frameColor: Int = Color.BLACK
     private var bgColor: Int = Color.argb(255, 255, 251, 251)
 
-    init{
+    init {
         context.withStyledAttributes(attrs, R.styleable.CustomClock, defStyleAttr) {
             paint.typeface = getFont(R.styleable.CustomClock_font)
             textColor = getColor(R.styleable.CustomClock_textColor, textColor)
             frameColor = getColor(R.styleable.CustomClock_frameColor, frameColor)
-            ClockArrows.SECONDS.color = getColor(R.styleable.CustomClock_secondHandColor,
-                ClockArrows.SECONDS.color)
-            ClockArrows.MINUTES.color = getColor(R.styleable.CustomClock_minuteHandColor,
-                ClockArrows.MINUTES.color)
-            ClockArrows.HOURS.color = getColor(R.styleable.CustomClock_hourHandColor,
-                ClockArrows.HOURS.color)
+            ClockArrows.SECONDS.color = getColor(
+                R.styleable.CustomClock_secondHandColor,
+                ClockArrows.SECONDS.color
+            )
+            ClockArrows.MINUTES.color = getColor(
+                R.styleable.CustomClock_minuteHandColor,
+                ClockArrows.MINUTES.color
+            )
+            ClockArrows.HOURS.color = getColor(
+                R.styleable.CustomClock_hourHandColor,
+                ClockArrows.HOURS.color
+            )
             timeZone = TimeZones.timeZonesList[
                     getInt(R.styleable.CustomClock_timeZone, timeZone.zone)
             ]
@@ -68,10 +74,10 @@ class CustomClock @JvmOverloads constructor(
 
     private fun PointF.computeXYForHours(hour: Int, radius: Float) {
         // Angles are in radians.
-        val startAngle = Math.PI * (3/ 2.0)
+        val startAngle = Math.PI * (3 / 2.0)
         val angle = startAngle + hour * (Math.PI / 6)
         x = (radius * cos(angle)).toFloat() + lengthSide / 2
-        y = (radius * sin(angle)).toFloat() + mRect.height()/2 + lengthSide / 2
+        y = (radius * sin(angle)).toFloat() + mRect.height() / 2 + lengthSide / 2
     }
 
     private fun PointF.computeXYForDots(index: Int, radius: Float) {
@@ -81,15 +87,20 @@ class CustomClock @JvmOverloads constructor(
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
-        lengthSide = min(width,
-            height).toFloat()
+        lengthSide = min(width, height).toFloat()
         radius = (min(width, height) / 2.0 * 0.9).toFloat()
-        shadowPainter = ShadowPainter(widthOfView = width.toFloat(),
-            heightOfView = width.toFloat(), timeZone)
-        arrowsPainter = ClockArrowPainter(widthOfView = width.toFloat(),
-            heightOfView = width.toFloat(), timeZone, radius)
-        radialShader = RadialShader(widthOfView = width.toFloat(),
-            heightOfView = width.toFloat())
+        shadowPainter = ShadowPainter(
+            widthOfView = lengthSide,
+            heightOfView = lengthSide, timeZone, radius
+        )
+        arrowsPainter = ClockArrowPainter(
+            widthOfView = lengthSide,
+            heightOfView = lengthSide, timeZone, radius
+        )
+        radialShader = RadialShader(
+            widthOfView = lengthSide,
+            heightOfView = lengthSide, radius
+        )
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -97,24 +108,28 @@ class CustomClock @JvmOverloads constructor(
 
         // drawing the edging
         paint.color = frameColor
-        canvas.drawCircle((lengthSide/2), (lengthSide/2), radius, paint)
+        canvas.drawCircle((lengthSide / 2), (lengthSide / 2), radius, paint)
 
         // drawing a dial
         paint.color = bgColor
-        canvas.drawCircle((lengthSide/2), (lengthSide/2), radiusOfInnerCircle, paint)
+        canvas.drawCircle((lengthSide / 2), (lengthSide / 2), radiusOfInnerCircle, paint)
 
         paint.color = Color.BLACK
-        for(minutes in 1..60){
+        for (minutes in 1..60) {
             pointPosition.computeXYForDots(minutes, radiusOfDashedCircle)
-            val sizeOfDot = if(minutes % 5 == 0) radius/80 else radius/100
+            val sizeOfDot = if (minutes % 5 == 0) radius / 80 else radius / 100
             canvas.drawCircle(pointPosition.x, pointPosition.y, sizeOfDot, paint)
         }
 
         /** border of hours */
-        val fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, radius*0.1f, resources.displayMetrics)
+        val fontSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP,
+            radius * 0.1f,
+            resources.displayMetrics
+        )
         paint.color = textColor
         paint.textSize = fontSize
-        for(hour in mClockHours) {
+        for (hour in mClockHours) {
             val tmp = hour.toString()
             paint.getTextBounds(tmp, 0, tmp.length, mRect)
 
@@ -137,4 +152,11 @@ class CustomClock @JvmOverloads constructor(
         invalidate()
     }
 
+    fun setTimeZone(offset: Int){
+        timeZone = TimeZones.getTimeZoneByOffset(offset)
+    }
+
+    fun setFontFamily(font: Typeface){
+        paint.typeface = font
+    }
 }

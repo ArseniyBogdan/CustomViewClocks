@@ -9,8 +9,8 @@ import kotlin.math.min
 
 class ShadowPainter(private val widthOfView: Float,
                     private val heightOfView: Float,
-                    private val timeZone: TimeZones): Paintable {
-    private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
+                    private val timeZone: TimeZones,
+                    private val radius: Float): Paintable {
 
     private val line = Line()
     private val lineBuilder = LineBuilder()

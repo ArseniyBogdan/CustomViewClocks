@@ -11,4 +11,6 @@
     <color name="red">#FF0000</color>
     <color name="green">#FF00FF00</color>
     <color name="blue">#FF0000FF</color>
+
+    <color name="card_color">#FFFAE0</color>
 </resources>

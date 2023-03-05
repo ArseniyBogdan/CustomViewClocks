@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Clocks</string>
-    <string name="test">Test</string>
+    <string name="test">Current time</string>
+    <string name="default_city">London</string>
+    <string name="default_utc">UTC+0</string>
+    <string name="default_description">Here you can find the oldest subway in the world</string>
 </resources>
