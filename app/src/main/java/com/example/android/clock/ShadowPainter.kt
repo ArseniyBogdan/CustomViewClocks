@@ -8,7 +8,7 @@ import com.example.android.clock.extensions.drawClockArrow
 import kotlin.math.min
 
 class ShadowPainter(private val widthOfView: Float, private val heightOfView: Float): Paintable {
-    private val radius = min(widthOfView, heightOfView) / 2
+    private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
 
     private val line = Line()
     private val lineBuilder = LineBuilder()
@@ -31,8 +31,9 @@ class ShadowPainter(private val widthOfView: Float, private val heightOfView: Fl
             startXY(widthOfView / 2f, heightOfView / 2f)
             canvas.drawClockArrow(radius*0.01f, build(line), paint)
             configureBuilder(clockArrowCoordinates)
+            offsetXY(offsetX, offsetY)
             stopXY(widthOfView / 2f, heightOfView / 2f)
-            canvas.drawClockArrow(radius*0.03f, lineBuilder.build(line), paint)
+            canvas.drawClockArrow(radius*0.03f, build(line), paint)
         }
 
 

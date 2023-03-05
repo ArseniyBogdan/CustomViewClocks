@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import com.example.android.clock.extensions.drawClockArrow
+import com.example.clocks.R
 import java.time.LocalTime
 import kotlin.math.cos
 import kotlin.math.min
@@ -22,9 +23,11 @@ class CustomClock @JvmOverloads constructor(
 
     private var radius = 0.0f
     private val radiusOfInnerCircle
-        get() = radius * 0.93f
+        get() = radius * 0.91f
     private val radiusOfDashedCircle
-        get() = radius * 0.88f
+        get() = radius * 0.84f
+    private val radiusForHoursCircle
+        get() = radius * 0.67f
 
     // объекты
     private val mRect = Rect()
@@ -36,8 +39,10 @@ class CustomClock @JvmOverloads constructor(
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
-        typeface = Typeface.create( "", Typeface.NORMAL)
+        typeface = resources.getFont(R.font.poppinsregular)
     }
+
+    private val creamColor = Color.argb(255, 255, 251, 251)
 
     private fun PointF.computeXYForHours(hour: Int, radius: Float) {
         // Angles are in radians.
@@ -54,7 +59,7 @@ class CustomClock @JvmOverloads constructor(
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
-        radius = (min(width, height) / 2.0 * 1).toFloat()
+        radius = (min(width, height) / 2.0 * 0.9).toFloat()
         shadowPainter = ShadowPainter(widthOfView = width.toFloat(),
             heightOfView = width.toFloat())
         arrowsPainter = ClockArrowPainter(widthOfView = width.toFloat(),
@@ -72,11 +77,10 @@ class CustomClock @JvmOverloads constructor(
         canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), radius, paint)
 
         // drawing a dial
-        paint.color = Color.WHITE
+        paint.color = creamColor
         canvas.drawCircle((width/2).toFloat(), (height/2).toFloat(), radiusOfInnerCircle, paint)
 
         paint.color = Color.BLACK
-
         for(minutes in 1..60){
             pointPosition.computeXYForDots(minutes, radiusOfDashedCircle)
             val sizeOfDot = if(minutes % 5 == 0) radius/80 else radius/100
@@ -84,9 +88,8 @@ class CustomClock @JvmOverloads constructor(
         }
 
         /** border of hours */
-        val fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.displayMetrics)
+        val fontSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, radius*0.1f, resources.displayMetrics)
         paint.textSize = fontSize
-        val radiusForHoursCircle = radius*0.75f
         for(hour in mClockHours) {
             val tmp = hour.toString()
             paint.getTextBounds(tmp, 0, tmp.length, mRect)

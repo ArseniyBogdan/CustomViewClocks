@@ -8,7 +8,7 @@ import kotlin.math.min
 
 class ClockArrowPainter(private val widthOfView: Float, private val heightOfView: Float): Paintable {
 
-    private val radius = min(widthOfView, heightOfView) / 2
+    private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
     private val clockArrowCoordinates = ClockArrowCoordinates(width = widthOfView, height = heightOfView)
     private val line = Line()
     private val lineBuilder = LineBuilder()
