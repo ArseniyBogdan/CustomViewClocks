@@ -7,7 +7,9 @@ import android.graphics.Paint
 import com.example.android.clock.extensions.drawClockArrow
 import kotlin.math.min
 
-class ShadowPainter(private val widthOfView: Float, private val heightOfView: Float): Paintable {
+class ShadowPainter(private val widthOfView: Float,
+                    private val heightOfView: Float,
+                    private val timeZone: TimeZones): Paintable {
     private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
 
     private val line = Line()
@@ -25,12 +27,26 @@ class ShadowPainter(private val widthOfView: Float, private val heightOfView: Fl
     }
 
     override fun paint(canvas: Canvas) {
-        /** отрисовка тени для секундной стрелки */
-        var arrowType = ClockArrows.SECONDS
         val offsetX = radius*0.05f
         val offsetY = radius*0.02f
+        var arrowType = ClockArrows.HOURS
+
+        /** отрисовка тени для минутной и часовой стрелки */
+        while(arrowType != ClockArrows.SECONDS){
+            paint.maskFilter = when(arrowType){
+                ClockArrows.MINUTES -> blurMaskM
+                ClockArrows.HOURS -> blurMaskH
+                else -> {null}
+            }
+            clockArrowCoordinates.computeXYForArrow(arrowType, timeZone)
+            lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
+            canvas.drawClockArrow(arrowType.strokeWidth, lineBuilder.build(line), paint)
+            arrowType = arrowType.next()
+        }
+
+        /** отрисовка тени для секундной стрелки */
         paint.maskFilter = blurMaskS
-        clockArrowCoordinates.computeXYForArrow(arrowType)
+        clockArrowCoordinates.computeXYForArrow(arrowType, timeZone)
         lineBuilder.apply {
             configureBuilder(clockArrowCoordinates)
             offsetXY(offsetX, offsetY)
@@ -40,19 +56,6 @@ class ShadowPainter(private val widthOfView: Float, private val heightOfView: Fl
             offsetXY(offsetX, offsetY)
             stopXY(widthOfView / 2f, heightOfView / 2f)
             canvas.drawClockArrow(ClockArrows.MINUTES.strokeWidth, build(line), paint)
-        }
-
-        /** отрисовка тени для минутной и часовой стрелки */
-        while(arrowType != ClockArrows.HOURS){
-            arrowType = arrowType.next()
-            paint.maskFilter = when(arrowType){
-                ClockArrows.MINUTES -> blurMaskM
-                ClockArrows.HOURS -> blurMaskH
-                else -> {null}
-            }
-            clockArrowCoordinates.computeXYForArrow(arrowType)
-            lineBuilder.configureBuilder(clockArrowCoordinates).offsetXY(offsetX, offsetY)
-            canvas.drawClockArrow(arrowType.strokeWidth, lineBuilder.build(line), paint)
         }
     }
 }

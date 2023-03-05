@@ -10,8 +10,10 @@ import kotlin.math.min
 
 class RadialShader(private val widthOfView: Float, private val heightOfView: Float): Paintable {
     private val radius = min(widthOfView, heightOfView) / 2 * 0.9f
-    private val radiusOfInnerCircle
-        get() = radius * 0.97f
+    private val radiusOfShadowShader
+        get() = radius * 0.93f
+    private val radiusOfBlurredShadow
+        get() = radius * 0.93f
 
     private val shadowShader: Bitmap = prepareShadowShader()
     private val shadowLayer: Bitmap = prepareBlurredShadow()
@@ -59,10 +61,10 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
             style = Paint.Style.STROKE
         }
 
-        canvasMask.drawCircle(widthOfView/2, heightOfView/2, radiusOfInnerCircle, shaderPaint)
+        canvasMask.drawCircle(widthOfView/2, heightOfView/2, radiusOfBlurredShadow, shaderPaint)
         val shadowLayer = blurredShadowCreate(bitmapShadow, widthOfView.toInt(), heightOfView.toInt(),
             Color.BLACK, 30, 15f, 3f)
-        cutArc(shadowLayer, radiusOfInnerCircle, 90f, 200f, 0f,0f,
+        cutArc(shadowLayer, radiusOfBlurredShadow, 90f, 200f, 0f,0f,
             PorterDuffXfermode(PorterDuff.Mode.SRC_IN))
 
         return shadowLayer
@@ -71,9 +73,9 @@ class RadialShader(private val widthOfView: Float, private val heightOfView: Flo
     private fun prepareShadowShader(): Bitmap{
         val bitmapDST = shadowShaderCreate()
         /** cutting circles*/
-        cutArc(bitmapDST, radiusOfInnerCircle,0f, 360f, 0f,0f,
+        cutArc(bitmapDST, radiusOfShadowShader,0f, 360f, 0f,0f,
             PorterDuffXfermode(PorterDuff.Mode.SRC_IN))
-        cutArc(bitmapDST, radiusOfInnerCircle,0f, 360f, radius*0.2f,radius*0.07f,
+        cutArc(bitmapDST, radiusOfShadowShader,0f, 360f, radius*0.2f,radius*0.07f,
             PorterDuffXfermode(PorterDuff.Mode.DST_OUT))
 
         return bitmapDST

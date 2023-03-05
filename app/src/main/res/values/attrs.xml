@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomClock">
+        <attr name="font"/>
+        <attr name="textColor" format="color">#FF000000</attr>
+        <attr name="frameColor" format="color">#FF000000</attr>
+        <attr name="secondHandColor" format="color">#FF000000</attr>
+        <attr name="minuteHandColor" format="color">#FF000000</attr>
+        <attr name="hourHandColor" format="color">#FF000000</attr>
+        <attr name="timeZone" format="enum">
+            <enum name="UTC_M12" value="0"/>
+            <enum name="UTC_M11" value="1"/>
+            <enum name="UTC_M10" value="2"/>
+            <enum name="UTC_M9" value="3"/>
+            <enum name="UTC_M8" value="4"/>
+            <enum name="UTC_M7" value="5"/>
+            <enum name="UTC_M6" value="6"/>
+            <enum name="UTC_M5" value="7"/>
+            <enum name="UTC_M4" value="8"/>
+            <enum name="UTC_M3" value="9"/>
+            <enum name="UTC_M2" value="10"/>
+            <enum name="UTC_M1" value="11"/>
+            <enum name="UTC_P0" value="12"/>
+            <enum name="UTC_P1" value="13"/>
+            <enum name="UTC_P2" value="14"/>
+            <enum name="UTC_P3" value="15"/>
+            <enum name="UTC_P4" value="16"/>
+            <enum name="UTC_P5" value="17"/>
+            <enum name="UTC_P6" value="18"/>
+            <enum name="UTC_P7" value="19"/>
+            <enum name="UTC_P8" value="20"/>
+            <enum name="UTC_P9" value="21"/>
+            <enum name="UTC_P10" value="22"/>
+            <enum name="UTC_P11" value="23"/>
+            <enum name="UTC_P12" value="24"/>
+            <enum name="UTC_P13" value="25"/>
+            <enum name="UTC_P14" value="26"/>
+        </attr>
+    </declare-styleable>
+</resources>

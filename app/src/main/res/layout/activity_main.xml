@@ -22,6 +22,14 @@
         android:text="@string/test"/>
 
     <com.example.android.clock.CustomClock
+        app:timeZone="UTC_P6"
+        app:textColor="@color/black"
+        app:backgroundColor="@color/black"
+        app:frameColor="@color/black"
+        app:secondHandColor="@color/black"
+        app:minuteHandColor="@color/black"
+        app:hourHandColor="@color/black"
+        app:font="@font/poppinsregular"
         android:id="@+id/customClock"
         android:layout_width="200dp"
         android:layout_height="200dp"
